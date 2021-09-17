@@ -40,12 +40,16 @@ class LowDbKv extends LowDbBase<TKeyValue> {
       await this.read()
 
       const { data } = this.db
-
-      return {
-        result: Object.keys(data!).find(
-          (key) => data!.hasOwnProperty(key) && data![key].hasOwnProperty(fieldname) && data![key][fieldname] === value
-        )
+      if (!data) {
+        return { error: 'no data' }
       }
+
+      const findedKey =
+        Object.keys(data).find(
+          (key) => data.hasOwnProperty(key) && data[key].hasOwnProperty(fieldname) && data[key][fieldname] === value
+        ) || ''
+
+      return { result: data[findedKey] }
     } catch (error) {
       return { error }
     }
