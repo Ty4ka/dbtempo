@@ -14,23 +14,25 @@ class LowDbKv extends LowDbBase<TKeyValue> {
   async add(kv: { [key: string]: any }) {
     try {
       await this.read()
-      for (const key in kv) {
-        if (kv.hasOwnProperty(key)) {
-          this.db.data![key] = kv[key]
-        }
-      }
+      Object.keys(kv).forEach((key) => {
+        this.db.data![key] = kv[key]
+      })
 
       await this.save()
-    } catch {}
+
+      return { result: true }
+    } catch (error) {
+      return { error }
+    }
   }
 
   async get(key: string) {
     try {
       await this.read()
-      return this.db.data![key]
-    } catch {}
-
-    return null
+      return { result: this.db.data![key] }
+    } catch (error) {
+      return { error }
+    }
   }
 
   async find(fieldname: string, value: any) {
@@ -38,20 +40,15 @@ class LowDbKv extends LowDbBase<TKeyValue> {
       await this.read()
 
       const { data } = this.db
-      for (const key in data) {
-        try {
-          if (
-            data.hasOwnProperty(key) &&
-            data[key].hasOwnProperty(fieldname) &&
-            data[key][fieldname] === value
-          ) {
-            return data[key]
-          }
-        } catch {}
-      }
-    } catch {}
 
-    return null
+      return {
+        result: Object.keys(data!).find(
+          (key) => data!.hasOwnProperty(key) && data![key].hasOwnProperty(fieldname) && data![key][fieldname] === value
+        )
+      }
+    } catch (error) {
+      return { error }
+    }
   }
 }
 

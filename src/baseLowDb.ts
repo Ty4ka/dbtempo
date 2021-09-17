@@ -19,8 +19,8 @@ class LowDbBase<T> {
       .replaceAll('{MM}', (d.getMonth() + 1).toString())
       .replaceAll('{DD}', d.getDate().toString())
 
-    const __dirname = dirname(fileURLToPath(import.meta.url))
-    const filepath = join(__dirname, 'storage', dbName)
+    const dir = dirname(fileURLToPath(import.meta.url))
+    const filepath = join(dir, 'storage', dbName)
     ensureDirectoryExistence(filepath)
     const adapter = new JSONFile<T>(filepath)
     this.db = new Low<T>(adapter)
@@ -29,7 +29,10 @@ class LowDbBase<T> {
   protected async save() {
     try {
       await this.db.write()
-    } catch {}
+      return { result: true }
+    } catch (error) {
+      return { error }
+    }
   }
 }
 
