@@ -37,7 +37,7 @@ class LowDbKv extends LowDbBase<TKeyValue> {
   async get(key: string) {
     try {
       await this.read()
-      const keyJson = JSON.stringify(key)
+      const keyJson = JSON.parse(key)
       const value = JSON.parse(this.db.data![keyJson])
 
       return { result: value }
