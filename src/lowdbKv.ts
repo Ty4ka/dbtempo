@@ -7,17 +7,24 @@ type TKeyValue = {
 
 class LowDbKv extends LowDbBase<TKeyValue> {
   async read() {
-    await this.db.read()
-    this.db.data ||= {}
+    try {
+      await this.db.read()
+      this.db.data ||= {}
+    } catch (error: any) {
+      return { error }
+    }
   }
 
   async add(kv: { [key: string]: any }) {
     try {
       await this.read()
       Object.keys(kv).forEach((key) => {
-        this.db.data![key] = kv[key]
+        try {
+          const keyJson = JSON.stringify(key)
+          const valueJson = JSON.stringify(kv[keyJson])
+          this.db.data![keyJson] = valueJson
+        } catch {}
       })
-
       await this.save()
 
       return { result: true }
@@ -29,7 +36,10 @@ class LowDbKv extends LowDbBase<TKeyValue> {
   async get(key: string) {
     try {
       await this.read()
-      return { result: this.db.data![key] }
+      const keyJson = JSON.stringify(key)
+      const value = JSON.parse(this.db.data![keyJson])
+
+      return { result: value }
     } catch (error) {
       return { error }
     }
@@ -45,9 +55,15 @@ class LowDbKv extends LowDbBase<TKeyValue> {
       }
 
       const findedKey =
-        Object.keys(data).find(
-          (key) => data.hasOwnProperty(key) && data[key].hasOwnProperty(fieldname) && data[key][fieldname] === value
-        ) || ''
+        Object.keys(data).find((key) => {
+          try {
+            if (!data.hasOwnProperty(key) || !data[key].hasOwnProperty(fieldname)) {
+              return
+            }
+
+            return data[key][fieldname] === value || JSON.parse(data[key][fieldname]) === value
+          } catch {}
+        }) || ''
 
       return { result: data[findedKey] }
     } catch (error) {
