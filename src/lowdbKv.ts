@@ -21,9 +21,7 @@ class LowDbKv extends LowDbBase<TKeyValue> {
       await this.read()
       Object.keys(kv).forEach((key) => {
         try {
-          const keyJson = JSON.stringify(key)
-          const valueJson = JSON.stringify(kv[keyJson])
-          this.db.data![keyJson] = valueJson
+          this.db.data![key] = kv[key]
         } catch {}
       })
       await this.save()
@@ -37,10 +35,7 @@ class LowDbKv extends LowDbBase<TKeyValue> {
   async get(key: string) {
     try {
       await this.read()
-      const keyJson = JSON.parse(key)
-      const value = JSON.parse(this.db.data![keyJson])
-
-      return { result: value }
+      return { result: this.db.data![key] }
     } catch (error) {
       return { error }
     }
@@ -62,7 +57,7 @@ class LowDbKv extends LowDbBase<TKeyValue> {
               return
             }
 
-            return data[key][fieldname] === value || JSON.parse(data[key][fieldname]) === value
+            return data[key][fieldname] === value
           } catch {}
         }) || ''
 

@@ -7,7 +7,8 @@ const debug = async () => {
   })
 
   await db.add({ a: new Date() })
-  // console.log(await db.get('a'))
+  console.log(await db.get('a'))
+  debugger
 }
 
 debug()
