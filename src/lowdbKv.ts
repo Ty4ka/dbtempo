@@ -7,6 +7,15 @@ type TKeyValue = {
 }
 
 class LowDbKv extends LowDbBase<TKeyValue> {
+  async getData() {
+    try {
+      await this.read()
+      return this.db.data
+    } catch (error: any) {
+      return { error }
+    }
+  }
+
   async read() {
     try {
       await this.db.read()
